@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="mx.com.baseapp.mappers.location.StateMapper">
+	
+	<!-- Result Map for Town -->
+	<resultMap id="townMap" type="mx.com.baseapp.model.geography.Town" >
+		<id column="id" property="id"  />
+		<result column="name" property="name" />
+	</resultMap>
+	
+	<!-- Result Map for State -->
+	<resultMap id="stateMap" type="mx.com.baseapp.model.geography.State" >
+		<id column="id" property="id"  />
+		<result column="name" property="name" />
+		<result column="acronym" property="acronym" />
+		<association 
+			property="country" 
+			column="id"
+			foreignColumn="id_country"
+			select="getCountry"/>
+		<collection 
+			property="towns" 
+			javaType="ArrayList"
+			column="id" 
+			ofType="mx.com.baseapp.baseapp.geography.Town" 
+			select="getTowns"/>
+	</resultMap>
+	
+	<!-- Result Map for Country -->
+	<resultMap id="countryMap" type="mx.com.baseapp.model.geography.Country" >
+		<id column="id" property="id"  />
+		<result column="name" property="name" />
+	</resultMap>
+
+	<select id="getStates" parameterType="mx.com.baseapp.model.geography.Country" resultMap="stateMap">
+		SELECT
+			state.id,
+    		state.name,
+    		state.acronym
+		FROM
+			baseapp.state state,
+			baseapp.country country
+		WHERE
+			state.id_country = country.id
+		AND
+			country.name = #{name};
+	</select>
+	
+	<select id="getTowns" parameterType="mx.com.baseapp.model.geography.Town" resultMap="townMap">
+		SELECT
+			id,
+    		name
+		FROM
+			baseapp.town
+		WHERE
+			id_state = #{state.id};
+	</select>
+	
+	<select id="getCountry" parameterType="mx.com.baseapp.model.geography.Country" resultMap="countryMap">
+		SELECT
+			id,
+    		name
+		FROM
+			baseapp.country
+		WHERE
+			id = #{state.id_country};
+	</select>
+</mapper>
